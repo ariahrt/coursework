@@ -1,0 +1,39 @@
+# Builds the iPhone app on one of GitHub's Macs and uploads Coursework.ipa (unsigned).
+# Sideloadly signs it with your Apple ID when you install it. See ios/README.md.
+name: Build iPhone app
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ["ios/**", ".github/workflows/ios.yml"]
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate the Xcode project
+        working-directory: ios
+        run: xcodegen generate
+
+      - name: Build (unsigned)
+        working-directory: ios
+        run: |
+          xcodebuild -project Coursework.xcodeproj -target Coursework -configuration Release -sdk iphoneos \
+            SYMROOT="$PWD/build" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+
+      - name: Package Coursework.ipa
+        working-directory: ios
+        run: |
+          mkdir Payload
+          cp -R build/Release-iphoneos/Coursework.app Payload/
+          zip -qr Coursework.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Coursework-ipa
+          path: ios/Coursework.ipa

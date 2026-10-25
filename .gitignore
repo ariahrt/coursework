@@ -1,0 +1,10 @@
+# Xcode output (the iPhone build makes these on GitHub's Mac)
+ios/build/
+ios/Payload/
+ios/*.ipa
+ios/*.xcodeproj/
+
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
